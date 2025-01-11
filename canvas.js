@@ -1,0 +1,1 @@
+const CANVAS_RATIO = 0.8;
