@@ -1,7 +1,4 @@
-const CANVAS_RATIO = 0.8;
-const HEADERTEXT = "Global Temperature Anomalies";
-const TOPMARGIN = 100;
-
+let table;
 let averageTemps = [];
 let minTemp, maxTemp;
 let hotColour, coldColour;
@@ -16,147 +13,102 @@ let delta = [];
 let textRadius = [];
 let stopDraw = 0;
 let months = [
-  "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
 ];
 let tempDegree = ["0°"];
-let timePeriods = ["1980 - 1989", "1990 - 1999", "2000 - 2009", "2010 - 2019"];
-let yearEighties = ["1980", "1981", "1982", "1983", "1984", "1985", "1986", "1987", "1988", "1989"];
-let yearNineties = ["1990", "1991", "1992", "1993", "1994", "1995", "1996", "1997", "1998", "1999"];
-let yearNoughties = ["2000", "2001", "2002", "2003", "2004", "2005", "2006", "2007", "2008", "2009"];
-let yearTens = ["2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019"];
-let decadeSelection = yearEighties;
-
-let a = 255;
-let circleSize = 10;
-let gaussianRandom = 1;
-let circleSpeed = 0.0025;
-let decadeButton = 0;
-let yearDial = 0;
-let circleDistance = 0.25;
+let timePeriods = ["1880-1889", "1890-1899", "1900-1909", "1910-1919", "1920-1929", "1930-1939",
+  "1940-1949", "1950-1959", "1960-1969", "1970-1979", "1980-1989",
+  "1990-1999", "2000-2009", "2010-2019"];
 
 function preload() {
-  table = loadTable("Data/data.csv", "csv", "header", () => {
-    console.log('CSV Loaded');
-  }, (error) => {
-    console.error('Error loading CSV:', error);
+  console.log("Loading data...");
+  table = loadTable('Data/data.csv', 'csv', 'header');
+
+  table.on('FileLoaded', function () {
+    console.log("Data loaded successfully");
+  });
+
+  table.on('FileLoadError', function (error) {
+    console.error("Error loading data:", error);
   });
 }
 
 
 function setup() {
-  createCanvas(innerWidth * CANVAS_RATIO, innerHeight * CANVAS_RATIO, WEBGL);
-  for (let rowI = 0; rowI < 40; rowI++) {
-    for (let colI = 0; colI < 12; colI++) {
-      averageTemps.push(table.get(rowI, colI));
-    }
-  }
+  createCanvas(800, 600);
 
-  minTemp = min(averageTemps);
-  maxTemp = max(averageTemps);
+  // Wait for table to load before proceeding
+  table.ready(function () {
+    console.log("Table ready");
 
-  hotColour = color(255, 0, 0, a);
-  coldColour = color(0, 0, 255, a);
+    // Parse data into averageTemps array
+    let rows = table.rows;
+    averageTemps = [];
+    for (let i = 0; i < rows.length; i++) {
+      averageTemps.push(parseFloat(rows[i].get('averageTemp'))
+    }};
 
-  strokeCap(SQUARE);
-  textAlign(CENTER, CENTER);
+    // Find min and max temperatures
+    minTemp = min(averageTemps);
+    maxTemp = max(averageTemps);
 
-  calculate();
-}
+    // Initialize colors
+    hotColour = color(255, 0, 0);
+    coldColour = color(0, 0, 255);
 
-function calculate() {
-  let decade = decadeButton;
-  r = height * circleDistance;
-  textR = height * 0.25;
-  radius = [];
-  textRadius = [];
-  theta = [];
-  delta = [];
-  for (let i = 0 + 120 * decade; i < 120 + 120 * decade; i++) {
-    radius.push(averageTemps[i] * r);
-    textRadius.push(textR + r * 0.6);
-    theta.push(((2 * Math.PI) / 12) * i + 0.25 * (Math.random() - 0.5));
-    thetaT.push(((2 * Math.PI) / 12) * i);
-    delta.push(map(averageTemps[i], minTemp, maxTemp, 0, 1));
-  }
+    // Calculate initial positions
+    calculate();
+  });
 }
 
 function draw() {
-  background(0, 15);
+  background(220);
 
-  // Set up lighting to make the globe look 3D
-  pointLight(255, 255, 255, 0, 0, 500); // Light source
-  ambientLight(100); // Ambient light for some soft shadows
+  // Draw temperature line plot
+  drawTemperatureLinePlot();
 
-  // Apply the text on top of the globe
-  textSize(36);
-  fill(255);
-  noStroke();
-  text(HEADERTEXT, 0, -height / 2 + TOPMARGIN / 2);
+  // Add labels and annotations
+  addLabelsAndAnnotations();
+}
 
-  fill(255);
-  text(timePeriods[0], 140, 150);
-  text(timePeriods[1], 140, 190);
-  text(timePeriods[2], 140, 230);
-  text(timePeriods[3], 140, 270);
+function calculate() {
+  let decade = floor(frameCount / 60); // Update every second
+  rot += 0.01;
 
-  stroke(255);
-  strokeWeight(3);
-  line(40, 167 + 40 * decadeButton, 245, 167 + 40 * decadeButton);
-
-  fill(255);
-  stroke(255);
-  textSize(50);
-  strokeWeight(1);
-  text(decadeSelection[exactYear], 1200, 800);
-
-  orbitControl();
-
-  // Outer ring (3D look)
-  noFill();
-  stroke(255);
-  strokeWeight(1);
-  sphere(r * 2.8);
-
-  // Middle ring (3D look)
-  stroke(255);
-  strokeWeight(1);
-  sphere(r);
-
-  noStroke();
-
-  let x, y;
-
-  let rotInc = circleSpeed;
-
-  strokeWeight(1);
-  for (let i = 0; i < 120; i++) {
-    let col = lerpColor(coldColour, hotColour, delta[i], a);
-    fill(col);
-    stroke(col);
-    
-    push();
-    x = cos(theta[i] + rot) * radius[i];
-    y = sin(theta[i] + rot) * radius[i];
-
-    // Use sphere instead of circle to give it a 3D appearance
-    push();
-    translate(x, y, 0);
-    sphere(circleSize);
-    pop();
-
-    tx = cos(thetaT[i] + rot) * textRadius[i];
-    ty = sin(thetaT[i] + rot) * textRadius[i];
-
-    stroke(0);
-    strokeWeight(1);
-    fill(225);
-
-    text(months[i], tx, ty);
-    textSize(20);
-    text(tempDegree[i], tx / 2.8, ty / 2.8);
-
-    pop();
+  radius = [];
+  theta = [];
+  for (let i = 0; i < averageTemps.length; i++) {
+    let t = frameCount * 0.01 + i;
+    radius.push(map(averageTemps[i], minTemp, maxTemp, 50, 200));
+    theta.push(t);
   }
+}
 
-  rot += rotInc;
+function drawTemperatureLinePlot() {
+  beginShape();
+  noStroke();
+  fill(100, 50);
+  for (let i = 0; i < averageTemps.length; i++) {
+    let x = map(i, 0, averageTemps.length - 1, width * 0.2, width - width * 0.2);
+    let y = height - map(averageTemps[i], minTemp, maxTemp, 0, height);
+    vertex(x, y);
+  }
+  endShape(CLOSE);
+}
+
+function addLabelsAndAnnotations() {
+  // Add title
+  fill(0);
+  textSize(24);
+  textAlign(CENTER, TOP);
+  text('Global Temperature Changes Since 1880', width / 2, 20);
+
+  // Add axis labels
+  stroke(0);
+  line(width * 0.2, height, width * 0.2, 0);
+  text('Year', width * 0.2 + 10, height + 15);
+
+  line(10, height, 0, height - 5);
+  text('Temperature Anomaly', -30, height + 10);
 }
