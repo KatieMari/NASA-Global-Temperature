@@ -1,18 +1,59 @@
-html, body {
+/* Font From Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Autour+One&family=DM+Serif+Text:ital@0;1&display=swap');
+
+/* Applies a Smooth Background Gradient to the Entire Webpage */
+body {
+  /* Removes Default Margin and Padding */
   margin: 0;
   padding: 0;
-}
-
-body {
+  /* Makes the Body Span the Full Height of the Viewport */
   height: 100vh;
-  width: 100vw;
+  /* Centers */
   display: flex;
   justify-content: center;
   align-items: center;
-  overflow: hidden;
-
+  flex-direction: column;
+  /* Gradient for Background Using Pinks */
+  background: linear-gradient(45deg, #000000, #000000, #000000);
+  background-size: 300% 300%;
+  animation: gradientShift 6s ease infinite;
+  font-family: 'Abril FatFace', sans-serif;
+  /* Text Colour */
+  color: #36454F;
+  text-align: center;
 }
 
+/* Defines the Keyframe Animation for the Gradient Background */
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Styles for the Canvas */
 canvas {
   display: block;
+  border-radius: 10px;
+  border: 5px solid white;
+  box-shadow:
+    /* Outer Glow Effect */
+    0 0 10px 4px rgba(193, 121, 226, 0.76),
+    /* Shadow for Depth */
+    0 0 20px 4px rgba(162, 65, 130, 0.6),
+    /* Glow Effect */
+    0 0 30px 6px rgba(242, 179, 214, 0.8);
+}
+
+/* Hover effect on Canvas for Interactivity */
+canvas:hover {
+  transform: scale(1.02);
+  transition: transform 0.3s ease-in-out;
 }

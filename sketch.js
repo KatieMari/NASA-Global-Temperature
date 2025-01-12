@@ -32,7 +32,7 @@ let yearTens = ["2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017", 
 let decadeSelection = yearEighties;
 
 let a = 255;
-let circleSize = 15;  // Increased circle size for better visibility
+let circleSize = 10;
 let gaussianRandom = 0;
 let circleSpeed = 0.0025;
 let decadeButton = 0;
@@ -41,21 +41,25 @@ let circleDistance = 0.25;
 let angle = 0;  // Initialize angle
 
 function preload() {
-  font = loadFont('Assets/Oswald.ttf');
+  // Try loading the font with fallback to a default font
+  font = loadFont('Assets/Oswald.ttf', () => {
+    console.log('Custom font loaded');
+  }, () => {
+    console.log('Custom font loading failed, using default font');
+    textFont('Arial');
+  });
 
   // Ensure data is loaded correctly
   table = loadTable("Data/data.csv", "csv", "header", () => {
     console.log("Data loaded successfully.");
+    console.log(table.getArray());  // Logs the full data array for debugging
   }, (error) => {
     console.error("Error loading data:", error);
   });
 }
 
 function setup() {
-  // Create canvas with a width and height based on the window size, and center it
-  let canvas = createCanvas(windowWidth, windowHeight, WEBGL);
-  canvas.position((windowWidth - width) / 2, (windowHeight - height) / 2); // Center the canvas
-
+  createCanvas(1200, 1000, WEBGL);
   textFont(font);
 
   // Initialize variables
@@ -66,7 +70,12 @@ function setup() {
   // Populate the averageTemps array
   for (let rowI = 0; rowI < 40; rowI++) {
     for (let colI = 0; colI < 12; colI++) {
-      averageTemps.push(parseFloat(table.get(rowI, colI)));  // Convert to float
+      let temp = parseFloat(table.get(rowI, colI));  // Convert to float
+      if (!isNaN(temp)) {  // Check for NaN values
+        averageTemps.push(temp);
+      } else {
+        averageTemps.push(0);  // Handle NaN values by assigning a default value
+      }
     }
   }
 
@@ -132,12 +141,16 @@ function calculate() {
 }
 
 function draw() {
-  background(50);  // Dark gray background (RGB)
+  background(0, 15);
 
+  // Draw 3D wireframe sphere and temperature data
   push();
   translate(width / 2, height / 2);
   rotateX(angle);
   rotateY(angle);
+
+  // Draw the wireframe sphere
+  drawWireframeSphere();
 
   // Draw the temperature data as 3D points
   drawTemperatureData();
@@ -147,53 +160,75 @@ function draw() {
   // Update rotation angle
   angle += 0.01;
 
-  // Change text color to light blue
-  fill(173, 216, 230);  // RGB for light blue
+  // Draw text at the top of the screen
   textSize(36);
+  fill(255);
   noStroke();
   text(HEADERTEXT, width / 2, TOPMARGIN / 2);
+  fill(0);
 
-  // Draw time periods with light blue color
+  // Draw time periods
+  fill(255);
   textSize(24);
-  text(timePeriods[0], 140, 150);
-  text(timePeriods[1], 140, 190);
-  text(timePeriods[2], 140, 230);
-  text(timePeriods[3], 140, 270);
+  text(timePeriods[0], 20, 150); // Previously 140
+  text(timePeriods[1], 20, 190); // Previously 140
+  text(timePeriods[2], 20, 230); // Previously 140
+  text(timePeriods[3], 20, 270); // Previously 140
+
+  // Draw decade line
   stroke(255);
   strokeWeight(3);
-  line(40, 167 + 40 * decadeButton, 245, 167 + 40 * decadeButton);
+  line(-50, 167 + 40 * decadeButton, 95, 167 + 40 * decadeButton); // Starting at X = 10
 
-  // Draw exact year with light yellow color
-  fill(255, 255, 224);  // Light yellow
+  // Draw exact year
+  fill(255);
   stroke(255);
   textSize(50);
   strokeWeight(1);
-  text(decadeSelection[exactYear], 1200, 800);
+  text(decadeSelection[exactYear], 800, 600);
 
   // Add interactive controls for rotation
   orbitControl();
 }
 
+function drawWireframeSphere() {
+  stroke(159, 99, 219);  // Light gray wireframe color
+  strokeWeight(0.5);
+  noFill();
+
+  let numLines = 12;  // Number of longitude/latitude lines
+  let sphereRadius = 200;
+
+  // Draw the latitude lines
+  for (let lat = -90; lat <= 90; lat += 180 / numLines) {
+    beginShape();
+    for (let lon = -180; lon <= 180; lon += 360 / numLines) {
+      let x = sphereRadius * cos(radians(lat)) * cos(radians(lon));
+      let y = sphereRadius * sin(radians(lat));
+      let z = sphereRadius * cos(radians(lat)) * sin(radians(lon));
+      vertex(x, y, z);
+    }
+    endShape(CLOSE);
+  }
+
+  // Draw the longitude lines
+  for (let lon = -180; lon <= 180; lon += 360 / numLines) {
+    beginShape();
+    for (let lat = -90; lat <= 90; lat += 180 / numLines) {
+      let x = sphereRadius * cos(radians(lat)) * cos(radians(lon));
+      let y = sphereRadius * sin(radians(lat));
+      let z = sphereRadius * cos(radians(lat)) * sin(radians(lon));
+      vertex(x, y, z);
+    }
+    endShape(CLOSE);
+  }
+}
+
 function drawTemperatureData() {
   for (let i = 0; i < radius.length; i++) {
-    let latIndex = int(i / 12);
-    let lonIndex = i % 12;
-    let lat = map(latIndex, 0, 9, -90, 90);
-    let lon = map(lonIndex, 0, 11, -180, 180);
-
-    let temp = averageTemps[i];
-    let x = radius[latIndex] * cos(radians(lat)) * cos(radians(lon));
-    let y = radius[latIndex] * sin(radians(lat));
-    let z = radius[latIndex] * cos(radians(lat)) * sin(radians(lon));
-
-    // Change the color based on temperature
-    let tempColor = lerpColor(coldColour, hotColour, delta[i]);
-
-    push();
-    translate(x, y, z);
-    fill(tempColor);
+    let colorLerp = lerpColor(coldColour, hotColour, delta[i]);
+    fill(colorLerp);
     noStroke();
-    sphere(circleSize);  // Increased circle size for better visibility
-    pop();
+    ellipse(radius[i] * cos(theta[i]), radius[i] * sin(theta[i]), circleSize);
   }
 }
