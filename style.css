@@ -14,7 +14,7 @@ body {
   align-items: center;
   flex-direction: column;
   /* Gradient for Background Using Pinks */
-  background: linear-gradient(45deg, #000000, #000000, #000000);
+  background: linear-gradient(45deg, #ffffff, #ffffff, #fffefe);
   background-size: 300% 300%;
   animation: gradientShift 6s ease infinite;
   font-family: 'Abril FatFace', sans-serif;
