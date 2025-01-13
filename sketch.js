@@ -9,6 +9,7 @@ const TOPMARGIN = 250;
 
 // Global Variables Used Across the Visualizations
 let font;
+let table;
 let averageTemps = [];
 let minTemp, maxTemp;
 let hotColour, coldColour;
@@ -20,69 +21,136 @@ let radius = [];
 let delta = [];
 let textRadius = [];
 let stopDraw = 0;
-let months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+let months = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
 let tempDegree = ["0°"];
 
 // Time Periods Defined for Decade Selection
 let timePeriods = ["1980 - 1989", "1990 - 1999", "2000 - 2009", "2010 - 2019"];
-let yearEighties = ["1980", "1981", "1982", "1983", "1984", "1985", "1986", "1987", "1988", "1989"];
-let yearNineties = ["1990", "1991", "1992", "1993", "1994", "1995", "1996", "1997", "1998", "1999"];
-let yearNoughties = ["2000", "2001", "2002", "2003", "2004", "2005", "2006", "2007", "2008", "2009"];
-let yearTens = ["2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019"];
+let yearEighties = [
+  "1980",
+  "1981",
+  "1982",
+  "1983",
+  "1984",
+  "1985",
+  "1986",
+  "1987",
+  "1988",
+  "1989",
+];
+let yearNineties = [
+  "1990",
+  "1991",
+  "1992",
+  "1993",
+  "1994",
+  "1995",
+  "1996",
+  "1997",
+  "1998",
+  "1999",
+];
+let yearNoughties = [
+  "2000",
+  "2001",
+  "2002",
+  "2003",
+  "2004",
+  "2005",
+  "2006",
+  "2007",
+  "2008",
+  "2009",
+];
+let yearTens = [
+  "2010",
+  "2011",
+  "2012",
+  "2013",
+  "2014",
+  "2015",
+  "2016",
+  "2017",
+  "2018",
+  "2019",
+];
 // Default to the 1980s Decade
 let decadeSelection = yearEighties;
 
 let a = 255;
 // Size of the Circles Representing Temperature Data Points
-let circleSize = 5;
+let circleSize = 7;
 let gaussianRandom = 0;
 let circleSpeed = 0.0025;
 // Keeps Track of Which Decade is Currently Selected
 let decadeButton = 0;
-// Slider Valur for the Specific Year Within a Decade
+// Slider Value for the Specific Year Within a Decade
 let yearDial = 0;
 // Distance from the Center for the Circles
-let circleDistance = 0.25;
-// Intialize Rotation Angle for Sphere
+let circleDistance = 0.4;
+// Initialize Rotation Angle for Sphere
 let angle = 0;
 
-// Preload Function to Load Font and Data
 function preload() {
-  // Load a Custom Font, with Fallback to Ariel if it Fails
-  font = loadFont('Assets/Oswald.ttf', () => {
-    console.log('Custom font loaded');
-  }, () => {
-    console.log('Custom font loading failed, using default font');
-    textFont('Arial');
-  });
+  // Load a Custom Font, with Fallback to Arial if it Fails
+  font = loadFont(
+    "Assets/Oswald.ttf",
+    () => {
+      console.log("Custom font loaded");
+    },
+    () => {
+      console.log("Custom font loading failed, using default font");
+      textFont("Arial");
+    }
+  );
 
   // Load the Temperature Data from a CSV File
-  table = loadTable("Data/data.csv", "csv", "header", () => {
-    console.log("Data loaded successfully.");
-    // Log the table array to check the data
-    console.log(table.getArray());
-    
-    // Check the data for min and max temperatures
-    checkData();
-  }, (error) => {
-    console.error("Error loading data:", error);
-  });
+  table = loadTable(
+    "Data/data.csv",
+    "csv",
+    "header",
+    () => {
+      console.log("Data loaded successfully.");
+      // Log the table array to check the data
+      console.log(table.getArray());
+
+      // Check the data for min and max temperatures after the table is loaded
+      checkData();
+    },
+    (error) => {
+      console.error("Error loading data:", error);
+    }
+  );
 }
 
-// Function to Check Data and Log min/max temperatures
 function checkData() {
   averageTemps = [];
 
-  // Populate the averageTemps Array with the Temperature Data
+  // Start from row 1 to row 40, and from column 1 to column 12 (ignoring the year column)
   for (let rowI = 0; rowI < 40; rowI++) {
-    for (let colI = 0; colI < 12; colI++) {
-      // Convert String to Float
+    for (let colI = 1; colI < 13; colI++) {
+      // Start from column 1 to avoid the year column
+      // Convert the temperature data (string) to float
       let temp = parseFloat(table.get(rowI, colI));
-      // Check if the Value is a Valid Number
+
+      // If valid data, push it into the averageTemps array
       if (!isNaN(temp)) {
         averageTemps.push(temp);
       } else {
-        // Assign a Default Value for Invalid Entries
+        // If invalid data, push a default value (0 or NaN)
         averageTemps.push(0);
       }
     }
@@ -94,9 +162,9 @@ function checkData() {
   console.log("Min Temp:", minTemp);
   console.log("Max Temp:", maxTemp);
 
-  // Calculate delta values for verification
-  let delta = averageTemps.map(temp => map(temp, minTemp, maxTemp, 0, 1));
-  console.log("Delta Values:", delta);  // Check the range of delta values
+  // Calculate delta values for mapping the temperatures to a 0-1 range
+  delta = averageTemps.map((temp) => map(temp, minTemp, maxTemp, 0, 1));
+  console.log("Delta Values:", delta); // Check the range of delta values
 }
 
 // Setup Function Where the Main Canvas and Initial Parameters are Defined
@@ -113,12 +181,6 @@ function setup() {
   // Log to check the averageTemps after loading data
   console.log("Average Temps:", averageTemps);
 
-  // Calculate Minimum and Maximum Temperatures from the Data
-  minTemp = min(averageTemps);
-  maxTemp = max(averageTemps);
-  console.log("Min Temp after setup:", minTemp);
-  console.log("Max Temp after setup:", maxTemp);
-
   // Set Stroke Properties for Smoother Graphics
   strokeCap(SQUARE);
   // Align Text to the Center
@@ -132,11 +194,10 @@ function setup() {
   draw();
 }
 
-
 // Function to Create the User Interface Elements
 function createButtons() {
   // Button to Cycle Through Decades
-  let decadeButtonElement = createButton('Next Decade');
+  let decadeButtonElement = createButton("Next Decade");
   decadeButtonElement.position(20, 80);
   decadeButtonElement.mousePressed(() => {
     // Cycle Through the Four Decades
@@ -221,7 +282,7 @@ function draw() {
   textSize(36);
   fill(255);
   noStroke();
-  text(HEADERTEXT, width / 20, -TOPMARGIN);
+  text(HEADERTEXT, width / 30, -TOPMARGIN);
   // Sets Colour of the Text
   fill(0);
 
@@ -245,74 +306,42 @@ function draw() {
   textSize(50);
   strokeWeight(1);
   text(decadeSelection[exactYear], 300, 200);
-
-  // Add Interactive Controls for Rotation
-  orbitControl();
+  
+  // orbitControl();
 }
 
+// Function to Draw the Wireframe Sphere for Temperature Data
 function drawWireframeSphere() {
-  // Set the Colour and Weight for the Wireframe Lines
-  stroke(159, 99, 219);
-  strokeWeight(0.5);
-  // Ensures the Sphere is Hollow
+  
+  push();
+  translate(-10, 0, 0); 
+   
+  orbitControl();
+  // Set the Wireframe Sphere's Radius
   noFill();
-
-  // Number of Lines for the Latitude and Longitude
-  let numLines = 12;
-  // // Radius of the Sphere
-  let sphereRadius = 200;
-
-  // Draw the Latitude Lines, Horizontal Circles Around the Sphere
-  for (let lat = -90; lat <= 90; lat += 180 / numLines) {
-    // Begin a Shape for the Current Latitude Line
-    beginShape();
-    for (let lon = -180; lon <= 180; lon += 360 / numLines) {
-      // Calculate 3D Coordinates for the Current Latitude/Longitude Point
-      let x = sphereRadius * cos(radians(lat)) * cos(radians(lon));
-      let y = sphereRadius * sin(radians(lat));
-      let z = sphereRadius * cos(radians(lat)) * sin(radians(lon));
-      // Add the Point to the Current Shape
-      vertex(x, y, z);
-    }
-    // Close the Shape to Complete the Circle
-    endShape(CLOSE);
-  }
-
-  // Draw the Longitude lines, Verticle Lines from Pole to Pole
-  for (let lon = -180; lon <= 180; lon += 360 / numLines) {
-    // Begin a Shape for the Current Longitude Line
-    beginShape();
-    for (let lat = -90; lat <= 90; lat += 180 / numLines) {
-      // Calculate 3D Coordinates for the Current Latitude/Longitude Point
-      let x = sphereRadius * cos(radians(lat)) * cos(radians(lon));
-      let y = sphereRadius * sin(radians(lat));
-      let z = sphereRadius * cos(radians(lat)) * sin(radians(lon));
-      // Add the Point to the Current Shape
-      vertex(x, y, z);
-    }
-    // Close the Shape to Complete the Line
-    endShape(CLOSE);
-  }
+  stroke(255, 100);
+  strokeWeight(0.8);
+  sphere(200);
+  
+  pop();
 }
 
+// Function to Draw the Circles Representing Each Temperature Data Point
 function drawTemperatureData() {
-  // Loop Through Each Data Point in the Radius Array
-  for (let i = 0; i < radius.length; i++) {
-    // Determine the Colour for the Current Data Point Based on its Temperature
-    let colorLerp = lerpColor(coldColour, hotColour, delta[i]);
-    // Set the Fill Color for the Data Point
-    fill(colorLerp);
-    // Remove the Outline for a Cleaner Look   
-    noStroke();
+  orbitControl();
+  for (let i = 0; i < delta.length; i++) {
+    // Map the Temperature Data to a Colour (Blue for Cold, Red for Hot)
+    let col = lerpColor(coldColour, hotColour, delta[i]);
 
-    // Calculate the 2D Position of the Data Point using Polar Coordinates
-    // X-Coordinate Based on Radius and Angle
+    // Calculate the Position of Each Circle Using Polar Coordinates
     let x = radius[i] * cos(theta[i]);
-    // Y-Coordinate Based on Radius and Angle 
     let y = radius[i] * sin(theta[i]);
-
-    // Draw a Small Circle at the Calculated Position
-    // `circleSize` Determines the Size of Each Point
-    ellipse(x, y, circleSize);
+    // Draw Each Circle Representing a Temperature
+    push();
+    translate(x, y);
+    noStroke();
+    fill(col);
+    ellipse(0, 0, circleSize, circleSize);
+    pop();
   }
 }
