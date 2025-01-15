@@ -1,59 +1,77 @@
 /* Font From Google Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Autour+One&family=DM+Serif+Text:ital@0;1&display=swap');
 
-/* Applies a Smooth Background Gradient to the Entire Webpage */
-body {
-  /* Removes Default Margin and Padding */
+html, body {
   margin: 0;
   padding: 0;
-  /* Makes the Body Span the Full Height of the Viewport */
+}
+
+body {
   height: 100vh;
-  /* Centers */
+  width: 100vw;
   display: flex;
   justify-content: center;
   align-items: center;
-  flex-direction: column;
-  /* Gradient for Background Using Pinks */
-  background: linear-gradient(45deg, #ffffff, #ffffff, #fffefe);
-  background-size: 300% 300%;
-  animation: gradientShift 6s ease infinite;
-  font-family: 'Abril FatFace', sans-serif;
-  /* Text Colour */
-  color: #36454F;
-  text-align: center;
-}
-
-/* Defines the Keyframe Animation for the Gradient Background */
-@keyframes gradientShift {
-  0% {
-    background-position: 0% 50%;
-  }
-
-  50% {
-    background-position: 100% 50%;
-  }
-
-  100% {
-    background-position: 0% 50%;
-  }
+  overflow: hidden;
+  background-color: black;
 }
 
 /* Styles for the Canvas */
 canvas {
   display: block;
-  border-radius: 10px;
-  border: 5px solid white;
-  box-shadow:
-    /* Outer Glow Effect */
-    0 0 10px 4px rgba(193, 121, 226, 0.76),
-    /* Shadow for Depth */
-    0 0 20px 4px rgba(162, 65, 130, 0.6),
-    /* Glow Effect */
-    0 0 30px 6px rgba(242, 179, 214, 0.8);
 }
 
-/* Hover effect on Canvas for Interactivity */
-canvas:hover {
-  transform: scale(1.02);
-  transition: transform 0.3s ease-in-out;
+button, .slider {
+  font-family: 'Oswald', Arial, sans-serif;
+  background-color: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 25px;
+  margin: 5px;
+  cursor: pointer;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.4);
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+/* Hover effect for buttons */
+button:hover, .slider:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
+
+.slider {
+  width: 200px;
+  height: 10px;
+  -webkit-appearance: none;
+  background: rgba(255, 255, 255, 0.2);
+  outline: none;
+  border-radius: 10px;
+  transition: background 0.3s ease;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #FF6347;
+  cursor: pointer;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.4);
+}
+
+.slider::-webkit-slider-thumb:hover {
+  background: #FF4500;
+}
+
+/* Fading effect on UI elements */
+button, .slider {
+  opacity: 0;
+  animation: fadeIn 1s ease-in-out forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }

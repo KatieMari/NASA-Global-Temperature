@@ -99,6 +99,7 @@ let circleSpeed = 0.0025;
 let decadeButton = 0;
 // Slider Value for the Specific Year Within a Decade
 let yearDial = 0;
+let yearDialElement;
 // Distance from the Center for the Circles
 let circleDistance = 0.4;
 // Initialize Rotation Angle for Sphere
@@ -169,8 +170,13 @@ function checkData() {
 
 // Setup Function Where the Main Canvas and Initial Parameters are Defined
 function setup() {
-  createCanvas(1000, 600, WEBGL);
+  createCanvas(windowWidth, windowHeight, WEBGL);
   textFont(font);
+
+    // Initialize the yearDialElement slider
+    yearDialElement = createSlider(0, 9, 0, 1);
+    yearDialElement.position(20, 120);
+    yearDialElement.class("immersive-slider");
 
   // Set Up Basic Visualization Parameters
   // Red Colour for Hot Temperature
@@ -199,6 +205,7 @@ function createButtons() {
   // Button to Cycle Through Decades
   let decadeButtonElement = createButton("Next Decade");
   decadeButtonElement.position(20, 80);
+  decadeButtonElement.class("immersive-btn");
   decadeButtonElement.mousePressed(() => {
     // Cycle Through the Four Decades
     decadeButton = (decadeButton + 1) % 4;
@@ -207,26 +214,31 @@ function createButtons() {
     calculate();
   });
 
-  // Slider to Adjust the Year Within the Selected Decade
-  let yearDialElement = createSlider(0, 9, 0, 1);
-  yearDialElement.position(20, 120);
-  yearDialElement.input(() => {
-    // Set the Selected Year
-    yearDial = yearDialElement.value();
-    exactYear = yearDial;
-    // Recalculate for the New Year
-    calculate();
-  });
 }
+
 
 // Function to Update the Decade Selection Based on the Current Button Press
 function updateDecadeSelection() {
   // Depending on the Button Press, Select the Corresponding Decade
-  if (decadeButton === 0) decadeSelection = yearEighties;
-  else if (decadeButton === 1) decadeSelection = yearNineties;
-  else if (decadeButton === 2) decadeSelection = yearNoughties;
-  else decadeSelection = yearTens;
+  if (decadeButton === 0) {
+    decadeSelection = yearEighties;
+  } else if (decadeButton === 1) {
+    decadeSelection = yearNineties;
+  } else if (decadeButton === 2) {
+    decadeSelection = yearNoughties;
+  } else {
+    decadeSelection = yearTens;
+  }
+
+  // Reset the Year Dial (Slider) to the Beginning (0)
+  yearDial = 0;
+  yearDialElement.value(yearDial); // Set the slider value to 0
+
+  // Recalculate Data for the Selected Decade
+  calculate();
 }
+
+
 
 // Function to Calculate the Visualization Data Based on the Selected Decade and Year
 function calculate() {
@@ -256,7 +268,15 @@ function calculate() {
 // Function to Draw the Visualization on the Canvas
 function draw() {
   // Set Background with Some Transparency
-  background(113, 28, 199, 100);
+  background(54, 69, 79);
+
+  // Display the Header Text at the Top of the Screen
+  textSize(36);
+  fill(255);
+  noStroke();
+  text(HEADERTEXT, width / 30, -TOPMARGIN);
+  // Sets Colour of the Text
+  fill(0)
 
   // Begin drawing the 3D content
   push();
@@ -278,13 +298,7 @@ function draw() {
   // Update Rotation Angle for the Globe Animation
   angle += 0.01;
 
-  // Display the Header Text at the Top of the Screen
-  textSize(36);
-  fill(255);
-  noStroke();
-  text(HEADERTEXT, width / 30, -TOPMARGIN);
-  // Sets Colour of the Text
-  fill(0);
+  ;
 
   // Display Time Periods for the Selected Decade
   fill(255);
@@ -306,42 +320,47 @@ function draw() {
   textSize(50);
   strokeWeight(1);
   text(decadeSelection[exactYear], 300, 200);
-  
-  // orbitControl();
+
+
 }
 
 // Function to Draw the Wireframe Sphere for Temperature Data
 function drawWireframeSphere() {
-  
+
   push();
-  translate(-10, 0, 0); 
-   
-  orbitControl();
+
+  rotateY(angle);
+  translate(-10, 0, 0);
+
+
   // Set the Wireframe Sphere's Radius
   noFill();
   stroke(255, 100);
   strokeWeight(0.8);
   sphere(200);
-  
+
   pop();
 }
 
 // Function to Draw the Circles Representing Each Temperature Data Point
 function drawTemperatureData() {
-  orbitControl();
+
   for (let i = 0; i < delta.length; i++) {
     // Map the Temperature Data to a Colour (Blue for Cold, Red for Hot)
     let col = lerpColor(coldColour, hotColour, delta[i]);
 
-    // Calculate the Position of Each Circle Using Polar Coordinates
+    // Calculate the Position of Each Sphere Using Polar Coordinates
     let x = radius[i] * cos(theta[i]);
     let y = radius[i] * sin(theta[i]);
-    // Draw Each Circle Representing a Temperature
+    let z = map(delta[i], 0, 1, -100, 100); // Map temperature to a range for the z-axis
+
+    // Draw Each Sphere Representing a Temperature
     push();
-    translate(x, y);
+    rotateY(angle);
+    translate(x, y, z); // Move to the calculated position in 3D space
     noStroke();
     fill(col);
-    ellipse(0, 0, circleSize, circleSize);
+    sphere(circleSize); // Use sphere instead of ellipse
     pop();
   }
 }
