@@ -178,6 +178,13 @@ function setup() {
     yearDialElement.position(20, 120);
     yearDialElement.class("immersive-slider");
 
+    // Add an event listener to update data on slider change
+  yearDialElement.input(() => {
+    yearDial = yearDialElement.value(); // Update yearDial based on slider
+    exactYear = yearDial; // Sync the exactYear with the slider value
+    calculate(); // Recalculate data based on new yearDial value
+    redraw(); // Force the canvas to redraw with updated data
+  });
   // Set Up Basic Visualization Parameters
   // Red Colour for Hot Temperature
   hotColour = color(255, 0, 0);
