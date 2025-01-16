@@ -180,10 +180,14 @@ function setup() {
 
     // Add an event listener to update data on slider change
   yearDialElement.input(() => {
-    yearDial = yearDialElement.value(); // Update yearDial based on slider
-    exactYear = yearDial; // Sync the exactYear with the slider value
-    calculate(); // Recalculate data based on new yearDial value
-    redraw(); // Force the canvas to redraw with updated data
+    // Update yearDial based on slider
+    yearDial = yearDialElement.value(); 
+    // Sync the exactYear with the slider value
+    exactYear = yearDial;
+    // Recalculate data based on new yearDial value
+    calculate();
+    // Force the canvas to redraw with updated data
+    redraw(); 
   });
   // Set Up Basic Visualization Parameters
   // Red Colour for Hot Temperature
