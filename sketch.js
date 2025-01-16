@@ -293,9 +293,7 @@ function draw() {
   push();
   // Move the origin to the center of the canvas
   translate(width / 45, height / 45);
-  // Temporary
-  // rotateX(angle);
-  // rotateY(angle);
+
 
   // Draw the Wireframe Sphere
   drawWireframeSphere();
