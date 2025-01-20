@@ -81,9 +81,7 @@ function preload() {
 
   // Load the Temperature Data from a CSV File
   table = loadTable(
-    "Data/data.csv",
-    "csv",
-    "header",
+    "Data/data.csv", "csv", "header",
     () => {
       console.log("Data loaded successfully.");
       // Log data array for debugging
@@ -145,9 +143,9 @@ function setup() {
   yearDialElement = createSlider(0, 9, 0, 1);
   yearDialElement.position(46, 120);
   // Slider width
-  yearDialElement.style('width', '150px'); 
+  yearDialElement.style('width', '150px');
   // Change cursor on hover
-  yearDialElement.style('cursor', 'pointer'); 
+  yearDialElement.style('cursor', 'pointer');
   // Add an event listener to update data on slider change
   yearDialElement.input(() => {
     // Update yearDial based on slider
@@ -260,7 +258,7 @@ function draw() {
   fill(255);
   noStroke();
   // Draw header
-  text(HEADERTEXT, width / 30, -350);
+  text(HEADERTEXT, width / 30, -400);
   // Sets Colour of the Text
   fill(0)
   // Begin drawing the 3D content
@@ -307,9 +305,9 @@ function drawWireframeSphere() {
   // Set the Wireframe Sphere's Radius
   noFill();
   stroke(255, 100);
-  strokeWeight(0.8);
+  strokeWeight(0.5);
   // Creates the base sphere with a radius of 200
-  sphere(300);
+  sphere(310);
   // Draw the month labels around the sphere
   for (let i = 0; i < months.length; i++) {
     // Calculate the position for the month label
